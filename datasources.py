@@ -14,7 +14,7 @@ def login(email, password):
 def dashboard_feed_to_dict(feed):
     data = {}
     for item in feed.entry:
-        data[item.title.text] = item.content.text.split(":")[1].strip()
+        data[item.title.text] = item.content.text.split(":")[1].split(",")[0].strip()
     return data
 
 
@@ -24,3 +24,8 @@ def fetch_feature_data(connection):
     feed = connection.GetListFeed(spreadsheet_id, dashboard_id)
     dashboard_data = dashboard_feed_to_dict(feed)
     return dashboard_data
+
+if __name__ == "__main__":
+    from auth import email, password
+    client = login(email, password)
+    print fetch_feature_data(client)
