@@ -11,10 +11,11 @@ def login(email, password):
     return gd_client
 
 
-def dashboard_feed_to_dict(feed):
-    data = {}
+def dashboard_feed_to_list(feed):
+    data = []
     for item in feed.entry:
-        data[item.title.text] = item.content.text.split(":")[1].split(",")[0].strip()
+        value = item.content.text.split(":")[1].split(",")[0].strip()
+        data.append({item.title.text: value})
     return data
 
 
@@ -22,7 +23,7 @@ def fetch_feature_data(connection):
     spreadsheet_id = "tMrsDYOEObCRpe8rkVsuerg"
     dashboard_id = 'odq'
     feed = connection.GetListFeed(spreadsheet_id, dashboard_id)
-    dashboard_data = dashboard_feed_to_dict(feed)
+    dashboard_data = dashboard_feed_to_list(feed)
     return dashboard_data
 
 if __name__ == "__main__":

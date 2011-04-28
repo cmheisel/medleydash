@@ -10,16 +10,6 @@ from datasources import login, fetch_feature_data
 app = Flask('medleydash')
 cache = SimpleCache()
 
-
-METRIC_NAME_MAPPING = (
-    ('done_this_week', "Features this week"),
-    ('this_weeks_goal', "This week's goal"),
-    ('done_this_month', "Features this month"),
-    ('this_months_goal', "This month's goal"),
-    ('done_last_week', "Last week"),
-    ('done_last_month', "Last month"),
-)
-
 @app.route('/')
 def dashboard():
     feature_data = cache.get('medleydash-features')
@@ -32,12 +22,8 @@ def dashboard():
                    timeout=5 * 60)
         updated_at = cache.get('medleydash-updated')
 
-    metrics = []
-    for key, verbose_name in METRIC_NAME_MAPPING:
-        metrics.append({verbose_name: feature_data[key]})
-
     context = {
-        'metrics': metrics,
+        'metrics': feature_data,
         'updated_at': updated_at,
 
     }
