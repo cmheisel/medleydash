@@ -1,26 +1,35 @@
 import datetime
-
 from flask import Flask, render_template
-from werkzeug.contrib.cache import SimpleCache
+
 
 from auth import email, password
 from datasources import login, fetch_feature_data
 
 
 app = Flask('medleydash')
-cache = SimpleCache()
+app.config.from_envvar('MEDLEYDASH_SETTINGS')
+
+def get_the_cache():
+    if app.config.get('CACHE_SERVER', None):
+        from werkzeug.contrib.cache import MemcachedCache
+        cache = MemcachedCache(app.config['CACHE_SERVER'])
+    else:
+        from werkzeug.contrib.cache import NullCache
+        cache = SimpleCache()
+    return cache
 
 @app.route('/')
 def dashboard():
+    cache = get_the_cache()
     feature_data = cache.get('medleydash-features')
     updated_at = cache.get('medleydash-updated')
     if not feature_data:
         connection = login(email, password)
         feature_data = fetch_feature_data(connection)
         cache.set('medleydash-features', feature_data, timeout=5 * 60)
-        cache.set('medleydash-updated', datetime.datetime.now(),
+        updated_at = datetime.datetime.now()
+        cache.set('medleydash-updated', updated_at,
                    timeout=5 * 60)
-        updated_at = cache.get('medleydash-updated')
 
     context = {
         'metrics': feature_data,
