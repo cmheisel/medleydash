@@ -34,6 +34,7 @@ def dashboard():
     context = {
         'metrics': feature_data,
         'updated_at': updated_at,
+        'title': "Medley Development Dashboard"
 
     }
     return render_template('dashboard.html', **context)
