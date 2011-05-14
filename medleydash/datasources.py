@@ -1,3 +1,5 @@
+from collections import namedtuple
+
 import gdata.spreadsheet.service
 import gdata.service
 import gdata.spreadsheet
@@ -5,6 +7,10 @@ import gdata.spreadsheet
 SPREADSHEET_ID = "tMrsDYOEObCRpe8rkVsuerg"
 DASHBOARD_ID = 'odq'
 WIP_ID = 'odo'
+
+WIPRecord = namedtuple('WIPRecord', 
+                       ['category', 'backlogdate', 'startdate', 
+                        'ticket', 'title', 'cycletime'])
 
 
 def login(email, password):
@@ -35,17 +41,14 @@ def fetch_wip_data(connection, spreadsheet_id=SPREADSHEET_ID,
                    dashboard_id=WIP_ID):
     feed = connection.GetListFeed(spreadsheet_id, dashboard_id)
     wip_data = []
-    for i, entry in enumerate(feed.entry):
-        row = {}
+    for entry in feed.entry:
+        row_kwargs = {}
+        # We do this because dict(row.custom.items()) doesn't return the values
         for key in entry.custom:
-            row[key] = entry.custom[key].text
-            if key == 'cycletime':
-                try:
-                    row[key] = int(row[key])
-                except TypeError:
-                    pass
+            row_kwargs[key] = entry.custom[key].text
+        row = WIPRecord(**row_kwargs)
         wip_data.append(row)
-    wip_data = sorted(wip_data, key=lambda row: row['cycletime'])
+    wip_data = sorted(wip_data, key=lambda row: row.cycletime)
     wip_data.reverse()
     return wip_data
 
