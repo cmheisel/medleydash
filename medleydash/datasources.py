@@ -9,8 +9,7 @@ DASHBOARD_ID = 'odq'
 WIP_ID = 'odo'
 
 WIPRecord = namedtuple('WIPRecord', 
-                       ['category', 'backlogdate', 'startdate', 
-                        'ticket', 'title', 'cycletime'])
+                       ['ticket', 'title', 'cycletime'])
 
 
 def login(email, password):
@@ -45,7 +44,14 @@ def fetch_wip_data(connection, spreadsheet_id=SPREADSHEET_ID,
         row_kwargs = {}
         # We do this because dict(row.custom.items()) doesn't return the values
         for key in entry.custom:
-            row_kwargs[key] = entry.custom[key].text
+            if key == 'cycletime':
+                try:
+                    value = int(entry.custom[key].text)
+                except TypeError:
+                    value = entry.custom[key].text
+            else:
+                value = entry.custom[key].text
+            row_kwargs[key] = value
         row = WIPRecord(**row_kwargs)
         wip_data.append(row)
     wip_data = sorted(wip_data, key=lambda row: row.cycletime)
