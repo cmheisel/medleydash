@@ -5,6 +5,7 @@ from flask import Flask, render_template
 from auth import email, password
 from datasources import login, fetch_feature_data, fetch_wip_data
 
+from medleydash import __version__
 
 app = Flask('medleydash')
 app.config.from_envvar('MEDLEYDASH_SETTINGS')
@@ -34,12 +35,13 @@ def dashboard():
     context = {
         'metrics': feature_data,
         'updated_at': updated_at,
-        'title': "Medley Development Dashboard"
+        'title': "Medley Development Dashboard",
+        'version': __version__,
 
     }
     return render_template('dashboard.html', **context)
 
-@app.route('/wip/')
+@app.route('/progress')
 def wip():
     cache = get_the_cache()
     wip_data = cache.get('medleydash-wip')
@@ -57,6 +59,7 @@ def wip():
         'wip_data': wip_data,
         'headers': wip_data[0]._fields,
         'updated_at': updated_at,
+        'version': __version__,
     }
     return render_template('wip.html', **context)
 
