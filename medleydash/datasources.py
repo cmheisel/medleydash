@@ -2,6 +2,11 @@ import gdata.spreadsheet.service
 import gdata.service
 import gdata.spreadsheet
 
+SPREADSHEET_ID = "tMrsDYOEObCRpe8rkVsuerg"
+DASHBOARD_ID = 'odq'
+WIP_ID = 'odo'
+
+
 def login(email, password):
     gd_client = gdata.spreadsheet.service.SpreadsheetsService()
     gd_client.email = email
@@ -19,14 +24,42 @@ def dashboard_feed_to_list(feed):
     return data
 
 
-def fetch_feature_data(connection):
-    spreadsheet_id = "tMrsDYOEObCRpe8rkVsuerg"
-    dashboard_id = 'odq'
+def fetch_feature_data(connection, spreadsheet_id=SPREADSHEET_ID,
+                       dashboard_id=DASHBOARD_ID):
     feed = connection.GetListFeed(spreadsheet_id, dashboard_id)
     dashboard_data = dashboard_feed_to_list(feed)
     return dashboard_data
 
+
+def fetch_wip_data(connection, spreadsheet_id=SPREADSHEET_ID,
+                   dashboard_id=WIP_ID):
+    feed = connection.GetListFeed(spreadsheet_id, dashboard_id)
+    wip_data = []
+    for i, entry in enumerate(feed.entry):
+        row = {}
+        for key in entry.custom:
+            row[key] = entry.custom[key].text
+            if key == 'cycletime':
+                try:
+                    row[key] = int(row[key])
+                except TypeError:
+                    pass
+        wip_data.append(row)
+    wip_data = sorted(wip_data, key=lambda row: row['cycletime'])
+    wip_data.reverse()
+    return wip_data
+
+
+def list_worksheets(connection, spreadsheet_id=SPREADSHEET_ID):
+    feed = connection.GetWorksheetsFeed(spreadsheet_id)
+    worksheets = {}
+    for i, entry in enumerate(feed.entry):
+        worksheet_id = feed.entry[i].id.text.split('/')[-1]
+        worksheets[worksheet_id] = feed.entry[i].title.text
+    return worksheets
+
 if __name__ == "__main__":
     from auth import email, password
     client = login(email, password)
-    print fetch_feature_data(client)
+    import pprint
+    pprint.pprint(fetch_wip_data(client))
