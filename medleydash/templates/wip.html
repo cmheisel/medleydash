@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div id="wip_data">
+<table>
+	<tr>
+	{% for header in headers %}
+		<th>{{ header }}</th>
+	{% endfor %}
+	</tr>
+
+	{% for row in wip_data %}
+	<tr class="{{ loop.cycle('odd', 'even') }}">
+		{% for field in row %}
+		<td>
+			<!-- {{ loop.counter }} -->
+			{% if loop.index0 == 0 %}
+			<a href="https://jira.cmgdigital.com/browse/{{ field }}">
+			{% endif %}
+			{{ field }}
+			{% if loop.index0 == 0 %}
+			</a>
+			{% endif %}		
+		</td>
+		{% endfor %}
+	</tr>
+	{% endfor %}
+</table>
+</div>
+{% endblock content %}

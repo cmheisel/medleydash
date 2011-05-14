@@ -65,10 +65,58 @@ p.updated {
     padding: 0;
     opacity: 0.5;
 }
+
+p.nav a {
+    color: #92CC47;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+p.nav a:hover {
+    text-decoration: underline;
+}
+
+#wip_data {
+    text-align: center;
+}
+
+table {
+    background-color: #E5F6F6;
+    color: #333;
+    border-collapse: collapse;
+    border-spacing: 0px;
+    text-align: left;
+    width: 80%;
+    margin: 0 10% 20px 10%;
+}
+
+table tr.even {
+    background-color: #fff;
+}
+
+table td, table th  {
+    margin: 0;
+    padding: 3px;
+}
+
+table th {
+    background-color: #92cc47;
+}
+
+table a {
+    text-decoration: none;
+}
+
+table a:hover {
+    text-decoration: underline;
+}
+
    </style>
 </head>
 <body>
 <h1>{{ title }}</h1>
+  <p class="nav"><a href="/">Overview</a> / <a href="/wip/">In Progress</a></p>
+
   {% block content %}{% endblock content %}
 
   <p class="updated">Updated at {{ updated_at }}</p>

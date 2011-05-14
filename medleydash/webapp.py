@@ -3,7 +3,7 @@ from flask import Flask, render_template
 
 
 from auth import email, password
-from datasources import login, fetch_feature_data
+from datasources import login, fetch_feature_data, fetch_wip_data
 
 
 app = Flask('medleydash')
@@ -38,6 +38,27 @@ def dashboard():
 
     }
     return render_template('dashboard.html', **context)
+
+@app.route('/wip/')
+def wip():
+    cache = get_the_cache()
+    wip_data = cache.get('medleydash-wip')
+    updated_at = cache.get('medleydash-wip-updated')
+    if not wip_data:
+        connection = login(email, password)
+        wip_data = fetch_wip_data(connection)
+        cache.set('medleydash-wip', wip_data, timeout=5 * 60)
+        updated_at = datetime.datetime.now()
+        cache.set('medleydash-wip-updated', updated_at,
+                   timeout=5 * 60)
+
+    context = {
+        'title': "Medley Work In Progress: %s" % (len(wip_data), ),
+        'wip_data': wip_data,
+        'headers': wip_data[0]._fields,
+        'updated_at': updated_at,
+    }
+    return render_template('wip.html', **context)
 
 if __name__ == "__main__":
     app.run(debug=True)
