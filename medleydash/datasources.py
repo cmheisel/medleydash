@@ -1,4 +1,5 @@
 from collections import namedtuple
+import datetime
 
 import gdata.spreadsheet.service
 import gdata.service
@@ -7,9 +8,13 @@ import gdata.spreadsheet
 SPREADSHEET_ID = "tMrsDYOEObCRpe8rkVsuerg"
 DASHBOARD_ID = 'odq'
 WIP_ID = 'odo'
+DONE_ID = 'odp'
 
 WIPRecord = namedtuple('WIPRecord', 
                        ['ticket', 'title', 'cycletime'])
+
+DoneRecord = namedtuple('CompletedRecord',
+                             ['doneon', 'ticket', 'title', 'cycletime'])
 
 
 def login(email, password):
@@ -58,6 +63,31 @@ def fetch_wip_data(connection, spreadsheet_id=SPREADSHEET_ID,
     wip_data.reverse()
     return wip_data
 
+def fetch_done_data(connection, spreadsheet_id=SPREADSHEET_ID,
+                   dashboard_id=DONE_ID):
+    feed = connection.GetListFeed(spreadsheet_id, dashboard_id)
+    wip_data = []
+    for entry in feed.entry:
+        row_kwargs = {}
+        # We do this because dict(row.custom.items()) doesn't return the values
+        for key in entry.custom:
+            if key == 'cycletime':
+                try:
+                    value = int(entry.custom[key].text)
+                except TypeError:
+                    value = entry.custom[key].text
+            else:
+                value = entry.custom[key].text
+            if key == 'doneon':
+                month, day, year = entry.custom[key].text.split('/')
+                month, day, year = int(month), int(day), int(year)
+                value = datetime.date(month=month, day=day, year=year)
+            row_kwargs[key] = value
+        row = DoneRecord(**row_kwargs)
+        wip_data.append(row)
+    wip_data = sorted(wip_data, key=lambda row: row.doneon)
+    wip_data.reverse()
+    return wip_data
 
 def list_worksheets(connection, spreadsheet_id=SPREADSHEET_ID):
     feed = connection.GetWorksheetsFeed(spreadsheet_id)
@@ -71,4 +101,4 @@ if __name__ == "__main__":
     from auth import email, password
     client = login(email, password)
     import pprint
-    pprint.pprint(fetch_wip_data(client))
+    pprint.pprint(fetch_done_data(client))
