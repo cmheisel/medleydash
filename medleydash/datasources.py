@@ -13,7 +13,7 @@ DONE_ID = 'odp'
 WIPRecord = namedtuple('WIPRecord', 
                        ['ticket', 'title', 'cycletime'])
 
-DoneRecord = namedtuple('CompletedRecord',
+DoneRecord = namedtuple('DoneRecord',
                              ['doneon', 'ticket', 'title', 'cycletime'])
 
 
