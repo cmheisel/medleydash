@@ -47,7 +47,7 @@ def get_wip_data():
 
 def get_done_data():
     cache = get_the_cache()
-    wip_data = cache.get('medleydash-done')
+    done_data = cache.get('medleydash-done')
     updated_at = cache.get('medleydash-done-updated')
     if not wip_data:
         connection = login(email, password)
