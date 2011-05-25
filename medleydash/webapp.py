@@ -49,7 +49,7 @@ def get_done_data():
     cache = get_the_cache()
     done_data = cache.get('medleydash-done')
     updated_at = cache.get('medleydash-done-updated')
-    if not wip_data:
+    if not done_data:
         connection = login(email, password)
         done_data = fetch_done_data(connection)
         cache.set('medleydash-done', done_data, timeout=5 * 60)
