@@ -111,11 +111,16 @@ table a:hover {
     text-decoration: underline;
 }
 
+th.doneon {
+    width: 10%;
+}
+
+
    </style>
 </head>
 <body>
 <h1>{{ title }}</h1>
-  <p class="nav">Updated {{ updated_at|timesince }} / <a href="https://spreadsheets0.google.com/spreadsheet/pub?hl=en&hl=en&key=0AqiI9D6ZdtZodE1yc0RZT0VPYkNScGU4cmtWc3Vlcmc&output=html">View the raw data</a></p>
+  <p class="nav">Updated {{ updated_at|timesince }} / <a href="/">Overview</a> / <a href="/done">Completed cards</a> / <a href="https://spreadsheets0.google.com/spreadsheet/pub?hl=en&hl=en&key=0AqiI9D6ZdtZodE1yc0RZT0VPYkNScGU4cmtWc3Vlcmc&output=html">View the raw data</a></p>
 
   {% block content %}{% endblock content %}
 

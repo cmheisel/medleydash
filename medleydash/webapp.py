@@ -3,7 +3,7 @@ from flask import Flask, render_template
 
 
 from auth import email, password
-from datasources import login, fetch_feature_data, fetch_wip_data
+from datasources import login, fetch_feature_data, fetch_wip_data, fetch_done_data
 
 from medleydash import __version__
 
@@ -44,6 +44,19 @@ def get_wip_data():
         cache.set('medleydash-wip-updated', updated_at,
                    timeout=5 * 60)
     return wip_data, updated_at
+
+def get_done_data():
+    cache = get_the_cache()
+    wip_data = cache.get('medleydash-done')
+    updated_at = cache.get('medleydash-done-updated')
+    if not wip_data:
+        connection = login(email, password)
+        done_data = fetch_done_data(connection)
+        cache.set('medleydash-done', done_data, timeout=5 * 60)
+        updated_at = datetime.datetime.now()
+        cache.set('medleydash-done-updated', updated_at,
+                   timeout=5 * 60)
+    return done_data, updated_at
 
 #Courtesy http://flask.pocoo.org/snippets/33/
 @app.template_filter()
@@ -92,6 +105,19 @@ def combined():
         'version': __version__,
     }
     return render_template('combined.html', **context)
+
+@app.route('/done')
+def done():
+    done_data, updated_at = get_done_data()
+
+    context = {
+        'title': 'Medley Development Dashboard: %s Done' % (len(done_data), ),
+        'done_data': done_data,
+        'headers': done_data[0]._fields,
+        'updated_at': updated_at,
+        'version': __version__,
+    }
+    return render_template('done.html', **context)
 
 if __name__ == "__main__":
     app.run(debug=True)
