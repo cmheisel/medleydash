@@ -1,5 +1,5 @@
 import datetime
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for
 
 
 from auth import email, password
@@ -15,20 +15,20 @@ def get_the_cache():
         from werkzeug.contrib.cache import MemcachedCache
         cache = MemcachedCache(app.config['CACHE_SERVER'])
     else:
-        from werkzeug.contrib.cache import NullCache
+        from werkzeug.contrib.cache import SimpleCache
         cache = SimpleCache()
     return cache
 
 def get_metrics_data():
     cache = get_the_cache()
     feature_data = cache.get('medleydash-features')
-    updated_at = cache.get('medleydash-updated')
+    updated_at = cache.get('medleydash-features-updated')
     if not feature_data:
         connection = login(email, password)
         feature_data = fetch_feature_data(connection)
         cache.set('medleydash-features', feature_data, timeout=5 * 60)
         updated_at = datetime.datetime.now()
-        cache.set('medleydash-updated', updated_at,
+        cache.set('medleydash-features-updated', updated_at,
                    timeout=5 * 60)
     return feature_data, updated_at
 
@@ -91,6 +91,8 @@ def combined():
     wip_data, wip_updated_at = get_wip_data()
     metrics_data, metrics_updated_at = get_metrics_data()
 
+    print "%s -- %s" % (wip_updated_at, metrics_updated_at)
+
     if metrics_updated_at < wip_updated_at:
         updated_at = metrics_updated_at
     else:
@@ -118,6 +120,18 @@ def done():
         'version': __version__,
     }
     return render_template('done.html', **context)
+
+@app.route('/flush')
+def flush():
+    """Blanks out all the cache keys, so you can force a re-fetch from Google."""
+    cache = get_the_cache()
+
+    key_bases = ['features', 'wip', 'done']
+    for key_base in key_bases:
+        cache.delete('medleydash-%s' % key_base)
+        cache.delete('medleydash-%s-updated' % key_base)
+    return redirect(url_for('combined'))
+
 
 if __name__ == "__main__":
     app.run(debug=True)
