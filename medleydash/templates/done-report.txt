@@ -1,0 +1,5 @@
+{{ title }}
+============================================
+
+{% for row in done_data %}* {{ row.doneon }} -- {{ row.ticket }}: {{ row.title }}
+{% endfor %}

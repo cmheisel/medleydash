@@ -1,5 +1,6 @@
 import datetime
-from flask import Flask, render_template, redirect, url_for
+from flask import (Flask, render_template, redirect, url_for, 
+                  render_template_string, make_response)
 
 
 from auth import email, password
@@ -131,6 +132,26 @@ def flush():
         cache.delete('medleydash-%s' % key_base)
         cache.delete('medleydash-%s-updated' % key_base)
     return redirect(url_for('combined'))
+
+@app.route('/done/report/<int:year_number>/<int:month_number>')
+def done_report(year_number, month_number):
+    """Returns a text version of the completed cards for the month."""
+    done_data, updated_at = get_done_data()
+
+    done_data = [ record for record in done_data if record.doneon.year == year_number
+                 and record.doneon.month == month_number ]
+
+    context = {
+        'title': 'Medley Development Report %s/%s: %s Done' % (month_number, year_number, 
+                  len(done_data), ),
+        'done_data': done_data,
+        'headers': done_data[0]._fields,
+        'updated_at': updated_at,
+        'version': __version__,
+    }
+    response = make_response(render_template('done-report.txt', **context))
+    response.headers['Content-Type'] = "text/plain"
+    return response
 
 
 if __name__ == "__main__":

@@ -23,6 +23,10 @@ class DashboardTests(unittest.TestCase):
         assert "cycletime</th>" in rv.data
         assert "doneon</th>" in rv.data
 
+    def test_done(self):
+        rv = self.app.get('/done/report/2011/05')
+        assert 200 == rv.status_code
+
     def test_flush(self):
         with self.app as c:
             rv = c.get('/flush')
